@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordPress Plugin Generator Professional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#0d0f14;--surf:#141720;--surf2:#1c2030;--surf3:#232840;
+  --b1:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.13);--b3:rgba(255,255,255,0.22);
+  --acc:#2196f3;--acc2:#00d084;--grn:#22d3a0;--amb:#f5a623;--red:#f05050;--pnk:#e879f9;
+  --txt:#e8eaf2;--mut:#7b82a0;
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14px;height:100vh;overflow:hidden;}
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh;}
+.topbar{background:var(--surf);border-bottom:1px solid var(--b2);padding:0 20px;height:52px;display:flex;align-items:center;gap:14px;flex-shrink:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;letter-spacing:-0.4px;white-space:nowrap;}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+.badges{display:flex;gap:6px;flex-wrap:nowrap;}
+.badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap;}
+.b-blue{background:rgba(33,150,243,0.15);color:var(--acc);border:1px solid rgba(33,150,243,0.3);}
+.b-grn{background:rgba(34,211,160,0.12);color:var(--grn);border:1px solid rgba(34,211,160,0.3);}
+.top-actions{margin-left:auto;display:flex;gap:8px;}
+.btn{font-family:var(--sans);font-size:12px;font-weight:600;padding:7px 13px;border-radius:7px;border:none;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-ghost{background:transparent;color:var(--mut);border:1px solid var(--b2);}
+.btn-ghost:hover{background:var(--surf2);color:var(--txt);}
+.btn-ok{background:var(--acc2);color:#0a1a14;font-weight:700;}
+.btn-ok:hover{background:#34e8b6;}
+.btn-sm{padding:4px 9px;font-size:11px;border-radius:5px;}
+.btn-pri{background:var(--acc);color:#fff;}
+.btn-danger{background:rgba(240,80,80,0.12);color:var(--red);border:1px solid rgba(240,80,80,0.25);}
+.main{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:210px;min-width:210px;background:var(--surf);border-right:1px solid var(--b1);overflow-y:auto;padding:10px 0;flex-shrink:0;}
+.sb-sec{padding:7px 14px 3px;font-size:9px;font-weight:700;letter-spacing:1.4px;color:var(--mut);text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--mut);border-left:2px solid transparent;transition:all 0.1s;}
+.sb-item:hover{background:var(--surf2);color:var(--txt);}
+.sb-item.on{background:rgba(0,208,132,0.11);color:var(--acc2);border-left-color:var(--acc2);}
+.sb-item .ic{font-size:13px;width:16px;text-align:center;}
+.content{flex:1;overflow-y:auto;padding:20px 24px;background:var(--bg);}
+/* ── PANELS ── */
+.panel{display:none;}.panel.on{display:block;}
+.sec-title{font-size:18px;font-weight:800;letter-spacing:-0.4px;margin-bottom:3px;}
+.sec-sub{font-size:12px;color:var(--mut);margin-bottom:18px;}
+.card{background:var(--surf);border:1px solid var(--b2);border-radius:11px;padding:18px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:var(--mut);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.card-title .dot{width:5px;height:5px;border-radius:50%;background:var(--acc2);}
+/* ── FORMS ── */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11px;font-weight:600;color:var(--mut);letter-spacing:0.3px;}
+.field input,.field select,.field textarea{
+  font-family:var(--sans);background:var(--surf2);border:1px solid var(--b2);
+  border-radius:7px;color:var(--txt);font-size:12px;padding:8px 10px;outline:none;transition:border 0.13s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc2);box-shadow:0 0 0 2px rgba(0,208,132,0.14);}
+.field select option{background:var(--surf2);}
+.field textarea{resize:vertical;min-height:70px;font-family:var(--mono);font-size:11px;}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);}
+.tr-l{font-size:12px;font-weight:500;}
+.tr-d{font-size:10px;color:var(--mut);margin-top:2px;}
+.tog{width:36px;height:19px;background:var(--surf3);border-radius:20px;cursor:pointer;position:relative;border:1px solid var(--b2);transition:background 0.18s;flex-shrink:0;}
+.tog.on{background:var(--acc2);border-color:var(--acc2);}
+.tog::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform 0.18s;}
+.tog.on::after{transform:translateX(17px);}
+/* ── PARAMS TABLE ── */
+.ptable{width:100%;border-collapse:collapse;font-size:11px;}
+.ptable th{text-align:left;padding:7px 9px;color:var(--mut);font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid var(--b2);}
+.ptable td{padding:7px 9px;border-bottom:1px solid var(--b1);vertical-align:middle;}
+.tpill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:700;}
+.tp-text{background:rgba(33,150,243,0.14);color:var(--acc);}
+/* ── CODE ── */
+.code-block{background:var(--surf2);border:1px solid var(--b2);border-radius:9px;overflow:hidden;margin-bottom:14px;}
+.code-hdr{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--b1);}
+.code-fn{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--mut);}
+.code-body{padding:13px;overflow-x:auto;}
+.code-body pre{font-family:var(--mono);font-size:10px;line-height:1.75;color:#c0c8f0;white-space:pre;}
+.tab-bar{display:flex;gap:3px;background:var(--surf2);border-radius:9px;padding:3px;flex-wrap:wrap;margin-bottom:14px;}
+.tab-btn{padding:6px 11px;border-radius:6px;border:none;background:none;color:var(--mut);font-family:var(--sans);font-size:10px;font-weight:600;cursor:pointer;transition:all 0.13s;white-space:nowrap;}
+.tab-btn.on{background:var(--surf);color:var(--txt);}
+/* ── STATUS BAR ── */
+.sbar{position:fixed;bottom:14px;right:20px;background:var(--surf);border:1px solid var(--b2);border-radius:9px;padding:9px 14px;font-size:11px;font-family:var(--mono);display:flex;align-items:center;gap:7px;opacity:0;transform:translateY(6px);transition:all 0.28s;z-index:999;box-shadow:0 8px 28px rgba(0,0,0,0.45);}
+.sbar.show{opacity:1;transform:translateY(0);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--acc2);box-shadow:0 0 5px var(--acc2);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="logo"><div class="logo-icon">WP</div> WordPress Plugin Generator <sub style="color:var(--acc2);font-weight:700">PRO</sub></div>
+    <div class="badges">
+      <span class="badge b-blue" id="bdg-slug">my-plugin</span>
+      <span class="badge b-grn" id="bdg-ver">v1.0.0</span>
+    </div>
+    <div class="top-actions">
+      <div style="display:flex;background:rgba(255,255,255,0.04);border:1px solid var(--b2);border-radius:7px;overflow:hidden;flex-shrink:0;">
+        <button onclick="setLang('pt')" id="lang-pt" style="padding:4px 10px;border:none;background:var(--acc2);color:#000;font-size:10px;font-weight:700;cursor:pointer;">PT</button>
+        <button onclick="setLang('en')" id="lang-en" style="padding:4px 10px;border:none;background:transparent;color:var(--mut);font-size:10px;font-weight:700;cursor:pointer;">EN</button>
+        <button onclick="setLang('es')" id="lang-es" style="padding:4px 10px;border:none;background:transparent;color:var(--mut);font-size:10px;font-weight:700;cursor:pointer;">ES</button>
+      </div>
+      <button class="btn btn-ghost" onclick="showPanel('preview')">👁 Preview</button>
+      <button class="btn btn-ok" onclick="generateZip()">⬇ Download ZIP</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="sb-sec" data-i18n="sb-config">Configuração</div>
+      <div class="sb-item on" onclick="showPanel('basic')" id="nav-basic"><span class="ic">📋</span><span data-i18n="sb-info">Informações</span></div>
+      <div class="sb-item" onclick="showPanel('features')" id="nav-features"><span class="ic">✨</span><span data-i18n="sb-features">Recursos</span></div>
+      <div class="sb-item" onclick="showPanel('params')" id="nav-params"><span class="ic">⚙️</span><span data-i18n="sb-params">Configurações</span></div>
+      <div class="sb-item" onclick="showPanel('temps')" id="nav-temps"><span class="ic">🧪</span><span data-i18n="sb-temps">Templates</span></div>
+      <div class="sb-sec" data-i18n="sb-output">Saída</div>
+      <div class="sb-item" onclick="showPanel('preview')" id="nav-preview"><span class="ic">👁</span><span data-i18n="sb-preview">Preview Código</span></div>
+      <div class="sb-item" onclick="showPanel('tree')" id="nav-tree"><span class="ic">📁</span><span data-i18n="sb-tree">Arquivos</span></div>
+      <div class="sb-item" onclick="showPanel('learn')" id="nav-learn"><span class="ic">📖</span><span data-i18n="sb-learn">Aprender WP</span></div>
+    </div>
+
+    <div class="content">
+      <!-- BASIC -->
+      <div class="panel on" id="panel-basic">
+        <div class="sec-title" data-i18n="panel-basic-title">📋 Informações Básicas</div>
+        <div class="sec-sub" data-i18n="panel-basic-sub">Metadados do plugin WordPress</div>
+        <div class="card">
+          <div class="card-title"><span class="dot"></span><span data-i18n="f-ident">Identificação</span></div>
+          <div class="fg">
+            <div class="field"><label data-i18n="f-name">Nome do Plugin</label><input id="f-name" value="My Plugin" oninput="sync()"></div>
+            <div class="field"><label data-i18n="f-slug">Slug do Plugin</label><input id="f-slug" value="my-plugin" oninput="sync()"></div>
+            <div class="field"><label data-i18n="f-uri">URI do Plugin</label><input id="f-uri" value="https://example.com/plugin"></div>
+            <div class="field"><label data-i18n="f-ver">Versão</label><input id="f-ver" value="1.0.0" oninput="sync()"></div>
+            <div class="field"><label data-i18n="f-auth">Autor</label><input id="f-auth" value="MyCompany"></div>
+            <div class="field"><label data-i18n="f-auth-uri">URI do Autor</label><input id="f-auth-uri" value="https://example.com"></div>
+            <div class="field" style="grid-column: 1/-1;"><label data-i18n="f-desc">Descrição</label><textarea id="f-desc">Um plugin profissional WordPress gerado pelo WP Generator Pro.</textarea></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot"></span><span data-i18n="f-hooks">Hooks de Instalação</span></div>
+          <div class="tr"><div class="tr-l"><span data-i18n="f-act-deact">Ativação / Desativação</span><div class="tr-d" data-i18n="f-act-deact-d">Cria ganchos de registro de ativação</div></div><div class="tog on" id="feat-hooks" onclick="tog('hooks')"></div></div>
+          <div class="tr"><div class="tr-l">Uninstall (uninstall.php)<div class="tr-d" data-i18n="f-uninst-d">Arquivo dedicado para limpeza de dados</div></div><div class="tog on" id="feat-uninst" onclick="tog('uninst')"></div></div>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="panel" id="panel-features">
+        <div class="sec-title" data-i18n="sb-features">✨ Recursos do Plugin</div>
+        <div class="sec-sub" data-i18n="panel-feat-sub">Selecione as funcionalidades que deseja incluir</div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="card">
+            <div class="card-title"><span class="dot"></span><span>Admin & UI</span></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-admin-menu">Página de Menu Principal</div><div class="tog" id="feat-admin" onclick="tog('admin')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-sub-menu">Submenu Pages</div><div class="tog" id="feat-sub" onclick="tog('sub')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-dash-widgets">Dashboard Widgets</div><div class="tog" id="feat-dash" onclick="tog('dash')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-admin-notices">Admin Notices</div><div class="tog" id="feat-notice" onclick="tog('notice')"></div></div>
+          </div>
+          
+          <div class="card">
+            <div class="card-title"><span class="dot"></span><span>Content & SEO</span></div>
+            <div class="tr"><div class="tr-l">Custom Post Type (CPT)</div><div class="tog" id="feat-cpt" onclick="tog('cpt')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-tax">Custom Taxonomies</div><div class="tog" id="feat-tax" onclick="tog('tax')"></div></div>
+            <div class="tr"><div class="tr-l">Meta Boxes</div><div class="tog" id="feat-meta" onclick="tog('meta')"></div></div>
+            <div class="tr"><div class="tr-l">Gutenberg Blocks</div><div class="tog" id="feat-block" onclick="tog('block')"></div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="dot"></span><span>Frontend</span></div>
+            <div class="tr"><div class="tr-l">Shortcodes</div><div class="tog" id="feat-short" onclick="tog('short')"></div></div>
+            <div class="tr"><div class="tr-l">Classic Widgets</div><div class="tog" id="feat-widget" onclick="tog('widget')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-sidebars">Sidebars registration</div><div class="tog" id="feat-sidebar" onclick="tog('sidebar')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-assets">Enqueue Scripts/Styles</div><div class="tog on" id="feat-assets" onclick="tog('assets')"></div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="dot"></span><span>Advanced</span></div>
+            <div class="tr"><div class="tr-l">REST API Endpoints</div><div class="tog" id="feat-api" onclick="tog('api')"></div></div>
+            <div class="tr"><div class="tr-l">AJAX Handlers</div><div class="tog" id="feat-ajax" onclick="tog('ajax')"></div></div>
+            <div class="tr"><div class="tr-l">WP-Cron Jobs</div><div class="tog" id="feat-cron" onclick="tog('cron')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-sql">Custom DB Tables</div><div class="tog" id="feat-sql" onclick="tog('sql')"></div></div>
+            <div class="tr"><div class="tr-l" data-i18n="f-roles">Roles & Capabilities</div><div class="tog" id="feat-roles" onclick="tog('roles')"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARAMS -->
+      <div class="panel" id="panel-params">
+        <div class="sec-title" data-i18n="sb-params">⚙️ Configurações (Settings API)</div>
+        <div class="sec-sub" data-i18n="panel-params-sub">Campos que serão registrados no banco de dados via Settings API</div>
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between">
+            <span data-i18n="p-registered">Campos Cadastrados</span>
+            <button class="btn btn-danger btn-sm" onclick="clearParams()" data-i18n="p-clear">✕ Limpar</button>
+          </div>
+          <table class="ptable">
+            <thead><tr><th data-i18n="p-type">Tipo</th><th>ID / Name</th><th>Label</th><th data-i18n="p-actions">Ações</th></tr></thead>
+            <tbody id="ptbody"></tbody>
+          </table>
+          <hr style="border:none;border-top:1px solid var(--b1);margin:13px 0;">
+          <div style="display:flex;gap:9px;align-items:flex-end">
+            <div class="field" style="flex:1;"><label>Label</label><input id="p-label" placeholder="Ex: API Key"></div>
+            <div class="field" style="flex:1;"><label>ID / Name</label><input id="p-name" placeholder="api_key"></div>
+            <button class="btn btn-pri btn-sm" onclick="quickAdd()" style="align-self:flex-end" data-i18n="p-add">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEMPLATES -->
+      <div class="panel" id="panel-temps">
+        <div class="sec-title">🧪 Biblioteca de Templates</div>
+        <div class="sec-sub">Clique em um template para configurar o gerador instantaneamente</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;" id="temps-grid"></div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="panel" id="panel-preview">
+        <div class="sec-title" data-i18n="sb-preview">👁 Preview do Código</div>
+        <div class="tab-bar" id="prev-tabs"></div>
+        <div id="prev-content"></div>
+      </div>
+
+      <!-- LEARN -->
+      <div class="panel" id="panel-learn">
+        <div class="sec-title" data-i18n="learn-title">📖 Guia do Desenvolvedor WordPress Pro</div>
+        <div class="sec-sub" data-i18n="learn-sub">Tudo o que você precisa saber para dominar o desenvolvimento de plugins com exemplos reais</div>
+
+        <div class="card">
+          <div class="card-title"><span class="dot"></span><span data-i18n="learn-h1">1. O Sistema de Hooks (Ganchos)</span></div>
+          <p style="color:var(--mut);line-height:1.6;margin-bottom:12px;">WordPress funciona através de eventos. Você não altera o core, você "pendura" seu código nos eventos existentes.</p>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:15px;">
+            <div style="background:var(--surf2);padding:14px;border-radius:8px;border:1px solid var(--b2);">
+              <strong style="color:var(--acc2);display:block;margin-bottom:5px;">Actions (Execução)</strong>
+              <small style="display:block;margin-bottom:8px;">Execute algo em um momento específico.</small>
+              <pre style="background:var(--bg);padding:8px;border-radius:4px;font-size:10px;color:var(--acc2)">add_action( 'init', 'meu_setup' );</pre>
+            </div>
+            <div style="background:var(--surf2);padding:14px;border-radius:8px;border:1px solid var(--b2);">
+              <strong style="color:var(--acc);display:block;margin-bottom:5px;">Filters (Modificação)</strong>
+              <small style="display:block;margin-bottom:8px;">Altere um valor antes de ser usado.</small>
+              <pre style="background:var(--bg);padding:8px;border-radius:4px;font-size:10px;color:var(--acc)">add_filter( 'the_content', 'mudar' );</pre>
+            </div>
+          </div>
+
+          <div style="background:var(--surf3);padding:15px;border-radius:8px;border-left:4px solid var(--acc2);">
+            <strong style="font-size:11px;display:block;margin-bottom:5px;color:var(--txt);">Exemplo: Prioridade e Parâmetros</strong>
+            <pre style="font-size:10px;color:#c0c8f0;font-family:var(--mono);">// add_action( $tag, $function, $priority, $accepted_args );
+add_action( 'save_post', function( $post_id, $post, $update ) {
+    if ( ! $update ) return; // Só se for atualização
+    // Logica aqui...
+}, 10, 3 );</pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="dot"></span><span data-i18n="learn-h2">2. Manipulando o Banco de Dados ($wpdb)</span></div>
+          <p style="color:var(--mut);line-height:1.6;margin-bottom:12px;">Para consultas personalizadas, use sempre a variável global <code style="color:var(--acc2)">$wpdb</code> para segurança e compatibilidade.</p>
+          <pre style="background:var(--bg);padding:15px;border-radius:8px;font-size:10px;color:#c0c8f0;font-family:var(--mono);border:1px solid var(--b1);">global $wpdb;
+$tabela = $wpdb->prefix . 'minha_tabela';
+
+// INSERT
+$wpdb->insert( $tabela, ['nome' => 'João', 'email' => 'joao@ex.com'], ['%s', '%s'] );
+
+// SELECT (Sempre use prepare para evitar SQL Injection)
+$resultado = $wpdb->get_results( $wpdb->prepare( 
+    "SELECT * FROM $tabela WHERE id > %d", 10 
+) );</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--pnk)"></span><span data-i18n="learn-h3">3. AJAX do jeito certo (Localize Script)</span></div>
+          <p style="color:var(--mut);line-height:1.6;margin-bottom:10px;">Para usar AJAX no WP, você precisa enviar a URL do <code style="color:var(--acc2)">admin-ajax.php</code> para o seu JavaScript.</p>
+          <pre style="background:var(--bg);padding:15px;border-radius:8px;font-size:10px;color:#c0c8f0;font-family:var(--mono);border:1px solid var(--b1);">// No PHP
+wp_enqueue_script( 'meu-js', URL . 'script.js' );
+wp_localize_script( 'meu-js', 'meu_objeto', [
+    'ajax_url' => admin_url( 'admin-ajax.php' ),
+    'nonce'    => wp_create_nonce( 'meu_segredo' )
+]);
+
+// No JS
+$.post( meu_objeto.ajax_url, { 
+    action: 'minha_funcao_ajax', 
+    nonce: meu_objeto.nonce 
+}, function(res) { ... });</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--amb)"></span><span data-i18n="learn-h4">4. Transients (Cache Simples)</span></div>
+          <p style="color:var(--mut);line-height:1.6;margin-bottom:10px;">Evite processamentos pesados em cada carregamento usando Transients.</p>
+          <pre style="background:var(--bg);padding:15px;border-radius:8px;font-size:10px;color:#c0c8f0;font-family:var(--mono);border:1px solid var(--b1);">if ( false === ( $dados = get_transient( 'meu_cache' ) ) ) {
+    $dados = carregar_algo_pesado(); // API externa, etc.
+    set_transient( 'meu_cache', $dados, HOUR_IN_SECONDS );
+}
+return $dados;</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="dot"></span><span data-i18n="learn-h5">5. Links e Referências Profissionais</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <a href="https://developer.wordpress.org/plugins/" target="_blank" style="color:var(--acc);text-decoration:none;background:var(--surf2);padding:10px;border-radius:6px;border:1px solid var(--b2);font-size:12px;">📚 Plugin Handbook (Completo)</a>
+            <a href="https://developer.wordpress.org/reference/" target="_blank" style="color:var(--acc);text-decoration:none;background:var(--surf2);padding:10px;border-radius:6px;border:1px solid var(--b2);font-size:12px;">🔍 Code Reference (Funções)</a>
+            <a href="https://generatewp.com/" target="_blank" style="color:var(--acc);text-decoration:none;background:var(--surf2);padding:10px;border-radius:6px;border:1px solid var(--b2);font-size:12px;">🛠 GenerateWP (Snippets)</a>
+            <a href="https://wphierarchy.com/" target="_blank" style="color:var(--acc);text-decoration:none;background:var(--surf2);padding:10px;border-radius:6px;border:1px solid var(--b2);font-size:12px;">🗺 WP Hierarchy (Temas)</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TREE -->
+      <div class="panel" id="panel-tree">
+        <div class="sec-title" data-i18n="sb-tree">📁 Árvore de Arquivos</div>
+        <div class="card" id="ftree-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sbar" id="sbar"><div class="sdot"></div><span id="smsg">Pronto</span></div>
+
+<script>
+const state = {
+  name: 'My Plugin',
+  slug: 'my-plugin',
+  version: '1.0.0',
+  uri: 'https://example.com/plugin',
+  author: 'MyCompany',
+  author_uri: 'https://example.com',
+  desc: 'Um plugin profissional WordPress gerado pelo WP Generator Pro.',
+  feats: { 
+    psr: true, admin: false, sub: false, dash: false, notice: false,
+    cpt: false, tax: false, meta: false, block: false,
+    short: false, widget: false, sidebar: false, assets: true,
+    api: false, ajax: false, cron: false, sql: false, roles: false,
+    hooks: true, uninst: true
+  },
+  params: [],
+  files: {},
+  lang: 'pt'
+};
+
+const i18n = {
+  pt: { 
+    'sb-config': 'Configuração', 'sb-info': 'Informações', 'sb-features': 'Recursos', 'sb-params': 'Configurações', 'sb-temps': 'Templates', 'sb-output': 'Saída', 'sb-preview': 'Preview Código', 'sb-tree': 'Arquivos', 'sb-learn': 'Aprender WP',
+    'panel-basic-title': '📋 Informações Básicas', 'panel-basic-sub': 'Metadados do plugin WordPress',
+    'f-ident': 'Identificação', 'f-name': 'Nome do Plugin', 'f-slug': 'Slug do Plugin', 'f-uri': 'URI do Plugin', 'f-ver': 'Versão', 'f-auth': 'Autor', 'f-auth-uri': 'URI do Autor', 'f-desc': 'Descrição',
+    'f-hooks': 'Hooks de Instalação', 'f-act-deact': 'Ativação / Desativação', 'f-act-deact-d': 'Cria ganchos de registro de ativação', 'f-uninst-d': 'Arquivo dedicado para limpeza de dados',
+    'panel-feat-sub': 'Selecione as funcionalidades que deseja incluir',
+    'f-admin-menu': 'Página de Menu Principal', 'f-sub-menu': 'Submenu Pages', 'f-dash-widgets': 'Dashboard Widgets', 'f-admin-notices': 'Admin Notices',
+    'f-tax': 'Custom Taxonomies', 'f-sidebars': 'Sidebars registration', 'f-assets': 'Enqueue Scripts/Styles', 'f-sql': 'Custom DB Tables', 'f-roles': 'Roles & Capabilities',
+    'panel-params-sub': 'Campos que serão registrados no banco de dados via Settings API', 'p-registered': 'Campos Cadastrados', 'p-clear': '✕ Limpar', 'p-type': 'Tipo', 'p-actions': 'Ações', 'p-add': '+ Adicionar',
+    'learn-title': '📖 Guia do Desenvolvedor WordPress Pro', 'learn-sub': 'Tudo o que você precisa saber para dominar o desenvolvimento de plugins com exemplos reais',
+    'learn-h1': '1. O Sistema de Hooks (Ganchos)', 'learn-h2': '2. Manipulando o Banco de Dados ($wpdb)', 'learn-h3': '3. AJAX do jeito certo (Localize Script)', 'learn-h4': '4. Transients (Cache Simples)', 'learn-h5': '5. Links e Referências Profissionais',
+    't-n-0': 'Starter Lite', 't-d-0': 'Estrutura básica com cabeçalho do plugin e hooks de ativação.',
+    't-n-1': 'Admin Suite', 't-d-1': 'Cria uma página de menu principal e submenus no painel administrativo.',
+    't-n-2': 'Portfolio CPT', 't-d-2': 'Registra um Custom Post Type para "Portfólio" com suporte a categorias.',
+    't-n-3': 'Meta Master', 't-d-3': 'Adiciona Meta Boxes (campos personalizados) no editor de posts.',
+    't-n-4': 'Shortcode Pro', 't-d-4': 'Cria shortcodes personalizados para exibir conteúdo dinâmico.',
+    't-n-5': 'REST API Hub', 't-d-5': 'Registra rotas personalizadas na API REST do WordPress.',
+    't-n-6': 'AJAX Interface', 't-d-6': 'Implementadores de AJAX para comunicação frontend-backend.',
+    't-n-7': 'Cron Tasker', 't-d-7': 'Agenda tarefas automáticas (WP-Cron) para rodar scripts.',
+    't-n-8': 'DB Manager', 't-d-8': 'Cria tabelas personalizadas no banco de dados via SQL.',
+    't-n-9': 'Dashboard Pro', 't-d-9': 'Adiciona widgets informativos no painel inicial do WP.',
+    't-n-10': 'Role Control', 't-d-10': 'Cria novos níveis de usuário e define permissões personalizadas.',
+    't-n-11': 'Widget Master', 't-d-11': 'Registra widgets clássicos para uso em sidebars.',
+    't-n-12': 'Block Builder', 't-d-12': 'Prepara o ambiente para criação de blocos Gutenberg.',
+    't-n-13': 'SEO Optimizer', 't-d-13': 'Boilerplate para plugin de SEO com meta campos.',
+    't-n-14': 'Shop Helper', 't-d-14': 'Estrutura para e-commerce com CPT e API REST.',
+    't-n-15': 'Member Area', 't-d-15': 'Sistema básico de membros com restrição de acesso.',
+    't-n-16': 'Notificator', 't-d-16': 'Sistema de notificações administrativas em tempo real.',
+    't-n-17': 'Maintenance', 't-d-17': 'Ativa modo de manutenção no site através de ganchos.',
+    't-n-18': 'Contact Form', 't-d-18': 'Formulário de contato completo com shortcode e AJAX.',
+    't-n-19': 'Security Bot', 't-d-19': 'Monitora atividades do site via Cron e envia alertas.',
+    't-n-20': 'Cache Engine', 't-d-20': 'Cache de dados usando a API de Transients.',
+    't-n-21': 'Analytics Hub', 't-d-21': 'Integração de scripts externos via configurações.',
+    't-n-22': 'Social Bar', 't-d-22': 'Barra de compartilhamento social via shortcode.',
+    't-n-23': 'PDF Maker', 't-d-23': 'Botões administrativos para geração de PDFs.',
+    't-n-24': 'Event Cal', 't-d-24': 'Calendário com CPT de Eventos e Taxonomia.',
+    't-n-25': 'Testimonials', 't-d-25': 'Gestão de depoimentos com CPT dedicado.',
+    't-n-26': 'FAQ Accordion', 't-d-26': 'Gerador de FAQ com shortcode de exibição.',
+    't-n-27': 'Redirector', 't-d-27': 'Sistema de redirecionamentos de URL via banco.',
+    't-n-28': 'i18n Bridge', 't-d-28': 'Plugin focado em internacionalização de strings.',
+    't-n-29': 'Full Frame', 't-d-29': 'Template com todos os recursos do gerador ativados.',
+    't-n-30': 'Newsletter Lite', 't-d-30': 'Captura de e-mails com armazenamento e Cron.',
+    't-n-31': 'Ad Manager', 't-d-31': 'Gerenciador de anúncios com rastreamento SQL.',
+    't-n-32': 'WooCommerce Sync', 't-d-32': 'Sincronização via API REST e processos Cron.',
+    't-n-33': 'Image Optimizer', 't-d-33': 'Otimização de imagens via ganchos de upload.',
+    't-n-34': 'Custom Login UI', 't-d-34': 'Personalização da tela de login via CSS.',
+    't-n-35': 'Review System', 't-d-35': 'Sistema de avaliações com CPT e sistema de notas.',
+    't-n-36': 'Donation Button', 't-d-36': 'Botão de doações com configurações e AJAX.',
+    't-n-37': 'Job Board', 't-d-37': 'Portal de vagas com CPT Jobs e Localização.',
+    't-n-38': 'Recipe Index', 't-d-38': 'Índice de receitas com CPT e ingredientes.',
+    't-n-39': 'Affiliate Linker', 't-d-39': 'Gestor de links de afiliados via SQL.',
+    't-n-40': 'User Profile Ext', 't-d-40': 'Extensão de perfis de usuário com novos campos.',
+    't-n-41': 'Search Booster', 't-d-41': 'Melhoria na busca via filtros de WP_Query.',
+    't-n-42': 'XML Sitemap', 't-d-42': 'Gerador automático de sitemaps via Cron.',
+    't-n-43': 'Webhooks Out', 't-d-43': 'Disparo de webhooks externos em eventos.',
+    't-n-44': 'Slack Notifier', 't-d-44': 'Notificações no Slack para novos eventos.',
+    't-n-45': 'Instagram Feed', 't-d-45': 'Feed via Shortcode com cache Transient.',
+    't-n-46': 'Weather Widget', 't-d-46': 'Widget de clima com cache e tempo real.',
+    't-n-47': 'Table of Contents', 't-d-47': 'Sumários automáticos via filtros de conteúdo.',
+    't-n-48': 'GDPR Consent', 't-d-48': 'Aviso de cookies e consentimento de dados.',
+    't-n-49': 'Dark Mode Admin', 't-d-49': 'Modo escuro para o painel via CSS injetado.',
+    't-n-50': 'Hero Header Pro', 't-d-50': 'Criação de seções Hero com efeito parallax e CPT.',
+    't-n-51': 'Modern Slideshow', 't-d-51': 'Slideshow responsivo com gestão via CPT.',
+    't-n-52': 'Parallax Sections', 't-d-52': 'Efeitos de profundidade em seções via meta-dados.',
+    't-n-53': 'Video Background', 't-d-53': 'Backgrounds de vídeo para seções de destaque.',
+    't-n-54': 'Sticky Header', 't-d-54': 'Menu fixo inteligente com customização via painel.',
+    't-n-55': 'Scroll Animation', 't-d-55': 'Animações de entrada conforme o usuário faz scroll.',
+    't-n-56': 'Before/After Slider', 't-d-56': 'Comparador de imagens (antes e depois).',
+    't-n-57': 'Interactive Map', 't-d-57': 'Mapas interativos com marcadores personalizados.',
+    't-n-58': 'Floating Action', 't-d-58': 'Botões flutuantes para ações rápidas (WhatsApp).',
+    't-n-59': 'Mega Menu Base', 't-d-59': 'Estrutura base para menus complexos com colunas.'
+  },
+  en: { 
+    'sb-config': 'Configuration', 'sb-info': 'Information', 'sb-features': 'Features', 'sb-params': 'Settings', 'sb-temps': 'Templates', 'sb-output': 'Output', 'sb-preview': 'Code Preview', 'sb-tree': 'Files', 'sb-learn': 'Learn WP',
+    'panel-basic-title': '📋 Basic Information', 'panel-basic-sub': 'WordPress plugin metadata',
+    'f-ident': 'Identification', 'f-name': 'Plugin Name', 'f-slug': 'Plugin Slug', 'f-uri': 'Plugin URI', 'f-ver': 'Version', 'f-auth': 'Author', 'f-auth-uri': 'Author URI', 'f-desc': 'Description',
+    'f-hooks': 'Installation Hooks', 'f-act-deact': 'Activation / Deactivation', 'f-act-deact-d': 'Creates activation/deactivation registration hooks', 'f-uninst-d': 'Dedicated file for data cleanup',
+    'panel-feat-sub': 'Select the features you want to include',
+    'f-admin-menu': 'Main Menu Page', 'f-sub-menu': 'Submenu Pages', 'f-dash-widgets': 'Dashboard Widgets', 'f-admin-notices': 'Admin Notices',
+    'f-tax': 'Custom Taxonomies', 'f-sidebars': 'Sidebars registration', 'f-assets': 'Enqueue Scripts/Styles', 'f-sql': 'Custom DB Tables', 'f-roles': 'Roles & Capabilities',
+    'panel-params-sub': 'Fields that will be registered in the database via Settings API', 'p-registered': 'Registered Fields', 'p-clear': '✕ Clear', 'p-type': 'Type', 'p-actions': 'Actions', 'p-add': '+ Add',
+    'learn-title': '📖 WordPress Developer Pro Guide', 'learn-sub': 'Everything you need to know to master plugin development with real examples',
+    'learn-h1': '1. The Hook System', 'learn-h2': '2. Handling Database ($wpdb)', 'learn-h3': '3. AJAX the right way (Localize Script)', 'learn-h4': '4. Transients (Simple Caching)', 'learn-h5': '5. Professional Links & References',
+    't-n-0': 'Starter Lite', 't-d-0': 'Basic structure with plugin header and activation hooks.',
+    't-n-1': 'Admin Suite', 't-d-1': 'Creates a main menu and submenus in the admin panel.',
+    't-n-2': 'Portfolio CPT', 't-d-2': 'Registers a Portfolio CPT with category support.',
+    't-n-3': 'Meta Master', 't-d-3': 'Adds Meta Boxes (custom fields) to the post editor.',
+    't-n-4': 'Shortcode Pro', 't-d-4': 'Creates custom shortcodes to display dynamic content.',
+    't-n-5': 'REST API Hub', 't-d-5': 'Registers custom routes in the WordPress REST API.',
+    't-n-6': 'AJAX Interface', 't-d-6': 'Implements AJAX handlers for frontend-backend communication.',
+    't-n-7': 'Cron Tasker', 't-d-7': 'Schedules automatic tasks (WP-Cron) to run scripts.',
+    't-n-8': 'DB Manager', 't-d-8': 'Creates custom database tables via SQL.',
+    't-n-9': 'Dashboard Pro', 't-d-9': 'Adds informative widgets to the WP dashboard.',
+    't-n-10': 'Role Control', 't-d-10': 'Creates new user roles and defines capabilities.',
+    't-n-11': 'Widget Master', 't-d-11': 'Registers classic widgets for use in sidebars.',
+    't-n-12': 'Block Builder', 't-d-12': 'Prepares environment for Gutenberg block creation.',
+    't-n-13': 'SEO Optimizer', 't-d-13': 'SEO plugin boilerplate with meta fields.',
+    't-n-14': 'Shop Helper', 't-d-14': 'E-commerce structure with CPT and REST API.',
+    't-n-15': 'Member Area', 't-d-15': 'Basic member system with access restrictions.',
+    't-n-16': 'Notificator', 't-d-16': 'Real-time admin notification system.',
+    't-n-17': 'Maintenance', 't-d-17': 'Activates maintenance mode via hooks.',
+    't-n-18': 'Contact Form', 't-d-18': 'Complete contact form with shortcode and AJAX.',
+    't-n-19': 'Security Bot', 't-d-19': 'Monitors site activity via Cron and sends alerts.',
+    't-n-20': 'Cache Engine', 't-d-20': 'Data caching using the Transients API.',
+    't-n-21': 'Analytics Hub', 't-d-21': 'Integration of external scripts via settings.',
+    't-n-22': 'Social Bar', 't-d-22': 'Social sharing bar via shortcode.',
+    't-n-23': 'PDF Maker', 't-d-23': 'Admin buttons for PDF generation.',
+    't-n-24': 'Event Cal', 't-d-24': 'Calendar with Events CPT and Taxonomy.',
+    't-n-25': 'Testimonials', 't-d-25': 'Testimonial management with dedicated CPT.',
+    't-n-26': 'FAQ Accordion', 't-d-26': 'FAQ generator with display shortcode.',
+    't-n-27': 'Redirector', 't-d-27': 'URL redirection system via database.',
+    't-n-28': 'i18n Bridge', 't-d-28': 'Plugin focused on string internationalization.',
+    't-n-29': 'Full Frame', 't-d-29': 'Template with all generator features enabled.',
+    't-n-30': 'Newsletter Lite', 't-d-30': 'Email capture with storage and Cron.',
+    't-n-31': 'Ad Manager', 't-d-31': 'Ad manager with SQL tracking.',
+    't-n-32': 'WooCommerce Sync', 't-d-32': 'Sync via REST API and Cron processes.',
+    't-n-33': 'Image Optimizer', 't-d-33': 'Image optimization via upload hooks.',
+    't-n-34': 'Custom Login UI', 't-d-34': 'Login screen customization via CSS.',
+    't-n-35': 'Review System', 't-d-35': 'Review system with CPT and rating.',
+    't-n-36': 'Donation Button', 't-d-36': 'Donation button with settings and AJAX.',
+    't-n-37': 'Job Board', 't-d-37': 'Job portal with Jobs CPT and Location.',
+    't-n-38': 'Recipe Index', 't-d-38': 'Recipe index with CPT and ingredients.',
+    't-n-39': 'Affiliate Linker', 't-d-39': 'Affiliate link manager via SQL.',
+    't-n-40': 'User Profile Ext', 't-d-40': 'User profile extension with new fields.',
+    't-n-41': 'Search Booster', 't-d-41': 'Search improvement via WP_Query filters.',
+    't-n-42': 'XML Sitemap', 't-d-42': 'Automatic sitemap generator via Cron.',
+    't-n-43': 'Webhooks Out', 't-d-43': 'External webhooks on events.',
+    't-n-44': 'Slack Notifier', 't-d-44': 'Slack notifications for new events.',
+    't-n-45': 'Instagram Feed', 't-d-45': 'Feed via Shortcode with Transient cache.',
+    't-n-46': 'Weather Widget', 't-d-46': 'Weather widget with cache and real-time.',
+    't-n-47': 'Table of Contents', 't-d-47': 'Automatic TOC via content filters.',
+    't-n-48': 'GDPR Consent', 't-d-48': 'Cookie notice and data consent.',
+    't-n-49': 'Dark Mode Admin', 't-d-49': 'Admin dark mode via injected CSS.',
+    't-n-50': 'Hero Header Pro', 't-d-50': 'Hero sections with parallax effect and CPT.',
+    't-n-51': 'Modern Slideshow', 't-d-51': 'Responsive slideshow with CPT management.',
+    't-n-52': 'Parallax Sections', 't-d-52': 'Depth effects in sections via meta-data.',
+    't-n-53': 'Video Background', 't-d-53': 'Video backgrounds for highlighted sections.',
+    't-n-54': 'Sticky Header', 't-d-54': 'Smart sticky menu with panel customization.',
+    't-n-55': 'Scroll Animation', 't-d-55': 'Entry animations as the user scrolls.',
+    't-n-56': 'Before/After Slider', 't-d-56': 'Image comparator (before and after).',
+    't-n-57': 'Interactive Map', 't-d-57': 'Interactive maps with custom markers.',
+    't-n-58': 'Floating Action', 't-d-58': 'Floating buttons for quick actions (WhatsApp).',
+    't-n-59': 'Mega Menu Base', 't-d-59': 'Base structure for complex menus with columns.'
+  },
+  es: { 
+    'sb-config': 'Configuración', 'sb-info': 'Información', 'sb-features': 'Recursos', 'sb-params': 'Ajustes', 'sb-temps': 'Plantillas', 'sb-output': 'Salida', 'sb-preview': 'Vista Previa', 'sb-tree': 'Archivos', 'sb-learn': 'Aprender WP',
+    'panel-basic-title': '📋 Información Básica', 'panel-basic-sub': 'Metadatos del plugin WordPress',
+    'f-ident': 'Identificación', 'f-name': 'Nombre del Plugin', 'f-slug': 'Slug del Plugin', 'f-uri': 'URI del Plugin', 'f-ver': 'Versión', 'f-auth': 'Autor', 'f-auth-uri': 'URI do Autor', 'f-desc': 'Descripción',
+    'f-hooks': 'Hooks de Instalación', 'f-act-deact': 'Activación / Desactivación', 'f-act-deact-d': 'Crea ganchos de registro de activación', 'f-uninst-d': 'Archivo dedicado para limpieza de datos',
+    'panel-feat-sub': 'Seleccione las funcionalidades que desea incluir',
+    'f-admin-menu': 'Página de Menú Principal', 'f-sub-menu': 'Submenu Pages', 'f-dash-widgets': 'Dashboard Widgets', 'f-admin-notices': 'Admin Notices',
+    'f-tax': 'Custom Taxonomies', 'f-sidebars': 'Sidebars registration', 'f-assets': 'Enqueue Scripts/Styles', 'f-sql': 'Custom DB Tables', 'f-roles': 'Roles & Capabilities',
+    'panel-params-sub': 'Campos que se registrarán en la base de datos vía Settings API', 'p-registered': 'Campos Registrados', 'p-clear': '✕ Limpiar', 'p-type': 'Tipo', 'p-actions': 'Acciones', 'p-add': '+ Añadir',
+    'learn-title': '📖 Guia del Desarrollador WordPress Pro', 'learn-sub': 'Todo lo que necesitas saber para dominar el desarrollo de plugins con ejemplos reales',
+    'learn-h1': '1. El Sistema de Hooks', 'learn-h2': '2. Manejo de Base de Datos ($wpdb)', 'learn-h3': '3. AJAX de forma correcta (Localize Script)', 'learn-h4': '4. Transients (Caché Simple)', 'learn-h5': '5. Enlaces y Referencias Profesionales',
+    't-n-0': 'Starter Lite', 't-d-0': 'Estructura básica con cabecera y hooks de activación.',
+    't-n-1': 'Admin Suite', 't-d-1': 'Crea una página de menú y submenús administrativos.',
+    't-n-2': 'Portfolio CPT', 't-d-2': 'Registra un CPT de Portafolio con soporte de categorías.',
+    't-n-3': 'Meta Master', 't-d-3': 'Añade Meta Boxes (campos personalizados) al editor.',
+    't-n-4': 'Shortcode Pro', 't-d-4': 'Crea shortcodes personalizados para contenido dinâmico.',
+    't-n-5': 'REST API Hub', 't-d-5': 'Registra rutas personalizadas en la API REST.',
+    't-n-6': 'AJAX Interface', 't-d-6': 'Implementa handlers de AJAX para comunicación.',
+    't-n-7': 'Cron Tasker', 't-d-7': 'Programa tareas automáticas (WP-Cron).',
+    't-n-8': 'DB Manager', 't-d-8': 'Crea tablas personalizadas vía SQL.',
+    't-n-9': 'Dashboard Pro', 't-d-9': 'Añade widgets informativos al panel inicial.',
+    't-n-10': 'Role Control', 't-d-10': 'Crea nuevos roles de usuario y permisos.',
+    't-n-11': 'Widget Master', 't-d-11': 'Registra widgets clásicos para sidebars.',
+    't-n-12': 'Block Builder', 't-d-12': 'Prepara el entorno para bloques Gutenberg.',
+    't-n-13': 'SEO Optimizer', 't-d-13': 'Boilerplate de SEO con campos meta.',
+    't-n-14': 'Shop Helper', 't-d-14': 'Estructura de e-commerce con CPT y API REST.',
+    't-n-15': 'Member Area', 't-d-15': 'Sistema básico de miembros con restricciones.',
+    't-n-16': 'Notificator', 't-d-16': 'Sistema de notificaciones administrativas en tiempo real.',
+    't-n-17': 'Maintenance', 't-d-17': 'Activa modo de mantenimiento vía hooks.',
+    't-n-18': 'Contact Form', 't-d-18': 'Formulario de contacto con shortcode y AJAX.',
+    't-n-19': 'Security Bot', 't-d-19': 'Monitorea actividad vía Cron y envía alertas.',
+    't-n-20': 'Cache Engine', 't-d-20': 'Caché de datos usando Transients API.',
+    't-n-21': 'Analytics Hub', 't-d-21': 'Integración de scripts externos vía ajustes.',
+    't-n-22': 'Social Bar', 't-d-22': 'Barra de compartir via shortcode.',
+    't-n-23': 'PDF Maker', 't-d-23': 'Botones para generación de PDFs.',
+    't-n-24': 'Event Cal', 't-d-24': 'Calendario con CPT de Eventos y Taxonomía.',
+    't-n-25': 'Testimonials', 't-d-25': 'Gestión de testimonios con CPT dedicado.',
+    't-n-26': 'FAQ Accordion', 't-d-26': 'Generador de FAQ con shortcode.',
+    't-n-27': 'Redirector', 't-d-27': 'Sistema de redirecciones vía base de datos.',
+    't-n-28': 'i18n Bridge', 't-d-28': 'Plugin enfocado en internacionalización.',
+    't-n-29': 'Full Frame', 't-d-29': 'Template con todos los recursos activados.',
+    't-n-30': 'Newsletter Lite', 't-d-30': 'Captura de emails con almacenamiento y Cron.',
+    't-n-31': 'Ad Manager', 't-d-31': 'Gestor de anuncios con rastreo SQL.',
+    't-n-32': 'WooCommerce Sync', 't-d-32': 'Sincronización via API REST y Cron.',
+    't-n-33': 'Image Optimizer', 't-d-33': 'Optimización de imágenes vía upload hooks.',
+    't-n-34': 'Custom Login UI', 't-d-34': 'Personalización de login vía CSS.',
+    't-n-35': 'Review System', 't-d-35': 'Sistema de reseñas con CPT y notas.',
+    't-n-36': 'Donation Button', 't-d-36': 'Botón de donaciones con AJAX.',
+    't-n-37': 'Job Board', 't-d-37': 'Portal de empleo con CPT Jobs.',
+    't-n-38': 'Recipe Index', 't-d-38': 'Índice de recetas con CPT.',
+    't-n-39': 'Affiliate Linker', 't-d-39': 'Gestor de enlaces de afiliados vía SQL.',
+    't-n-40': 'User Profile Ext', 't-d-40': 'Extensión de perfiles con nuevos campos.',
+    't-n-41': 'Search Booster', 't-d-41': 'Mejora de búsqueda vía filtros WP_Query.',
+    't-n-42': 'XML Sitemap', 't-d-42': 'Generador de sitemaps vía Cron.',
+    't-n-43': 'Webhooks Out', 't-d-43': 'Webhooks externos en eventos.',
+    't-n-44': 'Slack Notifier', 't-d-44': 'Notificaciones Slack para eventos.',
+    't-n-45': 'Instagram Feed', 't-d-45': 'Feed via Shortcode con caché.',
+    't-n-46': 'Weather Widget', 't-d-46': 'Widget de clima con caché.',
+    't-n-47': 'Table of Contents', 't-d-47': 'Sumarios automáticos vía filtros.',
+    't-n-48': 'GDPR Consent', 't-d-48': 'Aviso de cookies y consentimiento.',
+    't-n-49': 'Dark Mode Admin', 't-d-49': 'Modo oscuro administrativo vía CSS.',
+    't-n-50': 'Hero Header Pro', 't-d-50': 'Secciones Hero con efecto parallax y CPT.',
+    't-n-51': 'Modern Slideshow', 't-d-51': 'Slideshow responsivo con gestión vía CPT.',
+    't-n-52': 'Parallax Sections', 't-d-52': 'Efectos de profundidad vía meta-datos.',
+    't-n-53': 'Video Background', 't-d-53': 'Backgrounds de video para secciones destacadas.',
+    't-n-54': 'Sticky Header', 't-d-54': 'Menú fijo inteligente con personalización.',
+    't-n-55': 'Scroll Animation', 't-d-55': 'Animaciones de entrada al hacer scroll.',
+    't-n-56': 'Before/After Slider', 't-d-56': 'Comparador de imágenes (antes y después).',
+    't-n-57': 'Interactive Map', 't-d-57': 'Mapas interactivos con marcadores.',
+    't-n-58': 'Floating Action', 't-d-58': 'Botones flotantes para acciones rápidas.',
+    't-n-59': 'Mega Menu Base', 't-d-59': 'Estructura base para menús complejos.'
+  }
+};
+
+function setLang(l) {
+  state.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[l][key]) el.textContent = i18n[l][key];
+  });
+  // Update active button
+  document.querySelectorAll('.top-actions button').forEach(btn => {
+    if (btn.id === 'lang-' + l) {
+      btn.style.background = 'var(--acc2)';
+      btn.style.color = '#000';
+    } else if (btn.id && btn.id.startsWith('lang-')) {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--mut)';
+    }
+  });
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(p => p.classList.remove('on'));
+  document.getElementById('panel-' + id).classList.add('on');
+  document.getElementById('nav-' + id).classList.add('on');
+  if(id === 'preview' || id === 'tree') generateFiles();
+}
+
+function sync() {
+  state.name = document.getElementById('f-name').value;
+  state.slug = document.getElementById('f-slug').value.toLowerCase().replace(/ /g, '-');
+  state.version = document.getElementById('f-ver').value;
+  document.getElementById('bdg-slug').textContent = state.slug;
+  document.getElementById('bdg-ver').textContent = 'v' + state.version;
+}
+
+function tog(k) {
+  state.feats[k] = !state.feats[k];
+  document.getElementById('feat-' + k).classList.toggle('on', state.feats[k]);
+}
+
+function quickAdd(){
+  const l = document.getElementById('p-label').value;
+  const n = document.getElementById('p-name').value;
+  if(!n) return;
+  state.params.push({label: l, name: n, type: 'text'});
+  document.getElementById('p-label').value = '';
+  document.getElementById('p-name').value = '';
+  renderParams();
+}
+
+function clearParams() {
+  state.params = [];
+  renderParams();
+}
+
+function renderParams(){
+  const tb = document.getElementById('ptbody'); tb.innerHTML = '';
+  state.params.forEach((p, i) => {
+    tb.innerHTML += `<tr><td><span class="tpill tp-text">text</span></td><td>${p.name}</td><td>${p.label}</td><td><button onclick="state.params.splice(${i},1);renderParams()">✕</button></td></tr>`;
+  });
+}
+
+function generateFiles() {
+  const S = state.slug.replace(/-/g, '_');
+  const PREFIX = S.toUpperCase();
+  const NS = state.author.replace(/ /g, '') + '\\' + state.name.replace(/ /g, '');
+  const F = state.feats;
+
+  let main = `<?php
+/**
+ * Plugin Name:       ${state.name}
+ * Plugin URI:        ${state.uri}
+ * Description:       ${state.desc}
+ * Version:           ${state.version}
+ * Author:            ${state.author}
+ * Author URI:        ${state.author_uri}
+ * Text Domain:       ${state.slug}
+ * License:           GPLv2 or later
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+// Constants
+define( '${PREFIX}_VERSION', '${state.version}' );
+define( '${PREFIX}_PATH', plugin_dir_path( __FILE__ ) );
+define( '${PREFIX}_URL', plugin_dir_url( __FILE__ ) );
+
+${F.psr ? `// Autoloader (PSR-4)
+spl_autoload_register( function ( $class ) {
+    $prefix = '${NS}\\\\';
+    $base_dir = __DIR__ . '/src/';
+    $len = strlen( $prefix );
+    if ( strncmp( $prefix, $class, $len ) !== 0 ) return;
+    $relative_class = substr( $class, $len );
+    $file = $base_dir . str_replace( '\\\\', '/', $relative_class ) . '.php';
+    if ( file_exists( $file ) ) require $file;
+} );` : ''}
+
+/**
+ * Activation / Deactivation
+ */
+${F.hooks ? `register_activation_hook( __FILE__, function() {
+    ${F.sql ? `// Run SQL install\n    (new ${NS}\\Database())->create_tables();` : ''}
+    flush_rewrite_rules();
+} );
+register_deactivation_hook( __FILE__, function() {
+    flush_rewrite_rules();
+} );` : ''}
+
+/**
+ * Initialize Plugin Core
+ */
+function ${S}_run() {
+    // Admin features
+    if ( is_admin() ) {
+        ${F.admin || F.sub || state.params.length ? `new ${NS}\\Admin\\Settings();` : ''}
+        ${F.dash ? `new ${NS}\\Admin\\Dashboard();` : ''}
+    }
+    
+    // Core features
+    ${F.cpt ? `new ${NS}\\Core\\PostTypes();` : ''}
+    ${F.short ? `new ${NS}\\Frontend\\Shortcodes();` : ''}
+    ${F.api ? `new ${NS}\\Api\\Endpoints();` : ''}
+    ${F.ajax ? `new ${NS}\\Core\\Ajax();` : ''}
+    ${F.cron ? `new ${NS}\\Core\\Cron();` : ''}
+    ${F.roles ? `new ${NS}\\Core\\Roles();` : ''}
+}
+add_action( 'plugins_loaded', '${S}_run' );
+
+/**
+ * Assets
+ */
+${F.assets ? `add_action( 'wp_enqueue_scripts', function() {
+    wp_enqueue_style( '${state.slug}-css', ${PREFIX}_URL . 'assets/css/public.css', [], ${PREFIX}_VERSION );
+    wp_enqueue_script( '${state.slug}-js', ${PREFIX}_URL . 'assets/js/public.js', ['jquery'], ${PREFIX}_VERSION, true );
+} );` : ''}
+`;
+
+  state.files = { [`${state.slug}.php`]: main };
+
+  if (F.uninst) state.files['uninstall.php'] = `<?php\ndefined( 'WP_UNINSTALL_PLUGIN' ) || exit;\n\n// Cleanup options\n// delete_option( '${state.slug}_settings' );`;
+
+  if (F.admin || state.params.length) {
+    state.files['src/Admin/Settings.php'] = `<?php
+namespace ${NS}\\Admin;
+
+class Settings {
+    public function __construct() {
+        add_action( 'admin_menu', [ $this, 'add_menu' ] );
+        add_action( 'admin_init', [ $this, 'register_settings' ] );
+    }
+    public function add_menu() {
+        add_menu_page( '${state.name}', '${state.name}', 'manage_options', '${state.slug}', [ $this, 'render' ] );
+    }
+    public function register_settings() {
+        register_setting( '${state.slug}_group', '${state.slug}_settings' );
+        add_settings_section( '${state.slug}_section', 'General Settings', null, '${state.slug}' );
+        ${state.params.map(p => `
+        add_settings_field( '${p.name}', '${p.label}', function() {
+            $options = get_option( '${state.slug}_settings' );
+            echo '<input type="text" name="${state.slug}_settings[${p.name}]" value="' . esc_attr( $options['${p.name}'] ?? '' ) . '">';
+        }, '${state.slug}', '${state.slug}_section' );`).join('')}
+    }
+    public function render() {
+        echo '<div class="wrap"><h1>${state.name}</h1><form method="post" action="options.php">';
+        settings_fields( '${state.slug}_group' );
+        do_settings_sections( '${state.slug}' );
+        submit_button();
+        echo '</form></div>';
+    }
+}`;
+  }
+
+  if (F.cpt) {
+    state.files['src/Core/PostTypes.php'] = `<?php
+namespace ${NS}\\Core;
+
+class PostTypes {
+    public function __construct() {
+        add_action( 'init', [ $this, 'register' ] );
+        ${F.meta ? `add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );\n        add_action( 'save_post', [ $this, 'save_meta_boxes' ] );` : ''}
+    }
+    public function register() {
+        register_post_type( 'custom_type', [
+            'labels' => [ 'name' => 'Custom Items', 'singular_name' => 'Item' ],
+            'public' => true,
+            'has_archive' => true,
+            'supports' => ['title', 'editor', 'thumbnail'],
+            'show_in_rest' => true
+        ] );
+        ${F.tax ? `
+        register_taxonomy( 'custom_tax', 'custom_type', [
+            'labels' => [ 'name' => 'Categories' ],
+            'hierarchical' => true,
+            'show_in_rest' => true
+        ] );` : ''}
+    }
+    ${F.meta ? `
+    public function add_meta_boxes() {
+        add_meta_box( '${state.slug}_meta', 'Extra Data', [ $this, 'render_meta_box' ], 'custom_type', 'side' );
+    }
+    public function render_meta_box( $post ) {
+        $val = get_post_meta( $post->ID, '_custom_key', true );
+        echo '<input type="text" name="custom_meta_field" value="' . esc_attr( $val ) . '" class="widefat">';
+    }
+    public function save_meta_boxes( $post_id ) {
+        if ( isset( $_POST['custom_meta_field'] ) ) {
+            update_post_meta( $post_id, '_custom_key', sanitize_text_field( $_POST['custom_meta_field'] ) );
+        }
+    }` : ''}
+}`;
+  }
+
+  if (F.short) {
+    state.files['src/Frontend/Shortcodes.php'] = `<?php
+namespace ${NS}\\Frontend;
+
+class Shortcodes {
+    public function __construct() {
+        add_shortcode( '${state.slug}_view', [ $this, 'render' ] );
+    }
+    public function render( $atts ) {
+        $a = shortcode_atts( [ 'title' => 'Default' ], $atts );
+        return '<div class="${state.slug}-shortcode"><h3>' . esc_html( $a['title'] ) . '</h3></div>';
+    }
+}`;
+  }
+
+  if (F.ajax) {
+    state.files['src/Core/Ajax.php'] = `<?php
+namespace ${NS}\\Core;
+
+class Ajax {
+    public function __construct() {
+        add_action( 'wp_ajax_${S}_action', [ $this, 'handle' ] );
+        add_action( 'wp_ajax_nopriv_${S}_action', [ $this, 'handle' ] );
+    }
+    public function handle() {
+        check_ajax_referer( '${state.slug}_nonce', 'nonce' );
+        wp_send_json_success( ['msg' => 'Success!'] );
+    }
+}`;
+  }
+
+  if (F.cron) {
+    state.files['src/Core/Cron.php'] = `<?php
+namespace ${NS}\\Core;
+
+class Cron {
+    public function __construct() {
+        add_filter( 'cron_schedules', [ $this, 'add_schedules' ] );
+        add_action( '${S}_cron_hook', [ $this, 'execute' ] );
+        if ( ! wp_next_scheduled( '${S}_cron_hook' ) ) {
+            wp_schedule_event( time(), 'hourly', '${S}_cron_hook' );
+        }
+    }
+    public function add_schedules( $schedules ) {
+        $schedules['every_five_minutes'] = [ 'interval' => 300, 'display' => 'Every 5 Minutes' ];
+        return $schedules;
+    }
+    public function execute() {
+        // Run logic
+    }
+}`;
+  }
+
+  if (F.dash) {
+    state.files['src/Admin/Dashboard.php'] = `<?php
+namespace ${NS}\\Admin;
+
+class Dashboard {
+    public function __construct() {
+        add_action( 'wp_dashboard_setup', [ $this, 'add_widgets' ] );
+    }
+    public function add_widgets() {
+        wp_add_dashboard_widget( '${state.slug}_dash', '${state.name} Info', function() {
+            echo '<p>Generated by WP Generator Pro</p>';
+        } );
+    }
+}`;
+  }
+
+  if (F.roles) {
+    state.files['src/Core/Roles.php'] = `<?php
+namespace ${NS}\\Core;
+
+class Roles {
+    public function __construct() {
+        add_action( 'init', [ $this, 'register_roles' ] );
+    }
+    public function register_roles() {
+        add_role( '${state.slug}_manager', 'Manager', [
+            'read' => true,
+            'edit_posts' => true,
+            '${state.slug}_capability' => true
+        ] );
+    }
+}`;
+  }
+
+  // Translation Support
+  state.files['src/Core/I18n.php'] = `<?php
+namespace ${NS}\\Core;
+
+class I18n {
+    public function __construct() {
+        add_action( 'init', [ $this, 'load_textdomain' ] );
+    }
+    public function load_textdomain() {
+        load_plugin_textdomain( '${state.slug}', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    }
+}`;
+
+  if (F.assets) {
+    state.files['assets/css/public.css'] = `/* Plugin Public CSS */`;
+    state.files['assets/js/public.js'] = `(function($) {\n    'use strict';\n    console.log('${state.name} Loaded');\n})(jQuery);`;
+  }
+
+  renderPreview(); renderTree();
+}
+
+function renderPreview() {
+  const tabs = document.getElementById('prev-tabs');
+  const cont = document.getElementById('prev-content');
+  tabs.innerHTML = ''; cont.innerHTML = '';
+  Object.keys(state.files).forEach((f, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (i === 0 ? ' on' : '');
+    btn.textContent = f;
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      document.querySelectorAll('.code-block').forEach(c => c.style.display = 'none');
+      document.getElementById('code-' + i).style.display = 'block';
+    };
+    tabs.appendChild(btn);
+    const block = document.createElement('div');
+    block.className = 'code-block'; block.id = 'code-' + i;
+    block.style.display = i === 0 ? 'block' : 'none';
+    block.innerHTML = `<div class="code-hdr"><span class="code-fn">${f}</span></div><div class="code-body"><pre><code>${state.files[f].replace(/</g, '&lt;')}</code></pre></div>`;
+    cont.appendChild(block);
+  });
+}
+
+function renderTree() {
+  const wrap = document.getElementById('ftree-wrap');
+  wrap.innerHTML = '<ul class="ftree"></ul>';
+  const ul = wrap.querySelector('ul');
+  Object.keys(state.files).sort().forEach(f => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>📄</span> ${f}`;
+    ul.appendChild(li);
+  });
+}
+
+async function generateZip() {
+  const zip = new JSZip();
+  const root = zip.folder(state.slug);
+  Object.keys(state.files).forEach(f => { root.file(f, state.files[f]); });
+  const blob = await zip.generateAsync({type:"blob"});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${state.slug}.zip`;
+  link.click();
+}
+
+const templates = [
+  { n: 'Starter Lite', d: 'Estrutura básica com cabeçalho do plugin e hooks de ativação. Ideal para scripts rápidos.', f: { psr: true, hooks: true } },
+  { n: 'Admin Suite', d: 'Cria uma página de menu principal e submenus no painel administrativo, incluindo tela de configurações.', f: { admin: true, sub: true, psr: true } },
+  { n: 'Portfolio CPT', d: 'Registra um Custom Post Type para "Portfólio" com suporte a categorias personalizadas (Taxonomias).', f: { cpt: true, tax: true, psr: true } },
+  { n: 'Meta Master', d: 'Adiciona Meta Boxes (campos personalizados) no editor de posts para salvar metadados extras.', f: { cpt: true, meta: true, psr: true } },
+  { n: 'Shortcode Pro', d: 'Cria shortcodes personalizados para exibir conteúdo dinâmico no frontend via [shortcode].', f: { short: true, assets: true, psr: true } },
+  { n: 'REST API Hub', d: 'Registra rotas personalizadas na API REST do WordPress para integração com apps externos.', f: { api: true, psr: true } },
+  { n: 'AJAX Interface', d: 'Implementa handlers de AJAX para comunicação frontend-backend sem recarregar a página.', f: { ajax: true, assets: true, psr: true } },
+  { n: 'Cron Tasker', d: 'Agenda tarefas automáticas (WP-Cron) para rodar scripts em intervalos específicos.', f: { cron: true, psr: true } },
+  { n: 'DB Manager', d: 'Cria tabelas personalizadas no banco de dados via SQL e prepara lógica de CRUD.', f: { sql: true, psr: true, hooks: true } },
+  { n: 'Dashboard Pro', d: 'Adiciona widgets informativos no painel inicial e dispara avisos (notices) administrativos.', f: { dash: true, notice: true, psr: true } },
+  { n: 'Role Control', d: 'Cria novos níveis de usuário (Roles) e define permissões (Capabilities) personalizadas.', f: { roles: true, psr: true } },
+  { n: 'Widget Master', d: 'Registra widgets clássicos para uso em sidebars e rodapés do tema.', f: { widget: true, sidebar: true, psr: true } },
+  { n: 'Block Builder', d: 'Prepara o ambiente para criação de blocos dinâmicos do Gutenberg usando PHP.', f: { block: true, psr: true, assets: true } },
+  { n: 'SEO Optimizer', d: 'Boilerplate para plugin de SEO com meta campos para títulos e meta-descrições.', f: { cpt: true, meta: true, short: true } },
+  { n: 'Shop Helper', d: 'Estrutura para e-commerce com CPT de Produtos, tabelas de pedidos e API REST.', f: { cpt: true, api: true, sql: true } },
+  { n: 'Member Area', d: 'Sistema básico de membros com restrição de acesso baseada em cargos de usuário.', f: { roles: true, cpt: true, psr: true } },
+  { n: 'Notificator', d: 'Sistema de notificações administrativas em tempo real usando AJAX e Notices.', f: { notice: true, ajax: true, psr: true } },
+  { n: 'Maintenance', d: 'Ativa modo de manutenção no site através de ganchos de ativação e tela de aviso.', f: { hooks: true, admin: true, psr: true } },
+  { n: 'Contact Form', d: 'Formulário de contato completo com shortcode, validação AJAX e envio de e-mail.', f: { short: true, ajax: true, assets: true } },
+  { n: 'Security Bot', d: 'Monitora atividades do site via Cron e envia alertas administrativos sobre segurança.', f: { cron: true, notice: true, psr: true } },
+  { n: 'Cache Engine', d: 'Implementação de cache de dados usando a API de Transients para ganho de performance.', f: { admin: true, psr: true } },
+  { n: 'Analytics Hub', d: 'Integração fácil de scripts externos (Google Analytics, Pixel) via configurações.', f: { admin: true, assets: true, psr: true } },
+  { n: 'Social Bar', d: 'Barra de compartilhamento social injetada via shortcode com carregamento de assets.', f: { short: true, assets: true, psr: true } },
+  { n: 'PDF Maker', d: 'Adiciona botões administrativos para geração e download de documentos em PDF.', f: { cpt: true, admin: true, psr: true } },
+  { n: 'Event Cal', d: 'Sistema de calendário com CPT de Eventos, Taxonomia e Meta Boxes de data.', f: { cpt: true, meta: true, tax: true } },
+  { n: 'Testimonials', d: 'Gestão de depoimentos com CPT dedicado e shortcode para exibição no site.', f: { cpt: true, short: true, assets: true } },
+  { n: 'FAQ Accordion', d: 'Gerador de perguntas frequentes com CPT e shortcode de exibição sanfonada.', f: { cpt: true, short: true, psr: true } },
+  { n: 'Redirector', d: 'Sistema de redirecionamentos de URL salvos em tabela customizada do banco.', f: { sql: true, hooks: true, psr: true } },
+  { n: 'i18n Bridge', d: 'Plugin focado em internacionalização, preparado para múltiplos idiomas (Text Domain).', f: { psr: true, admin: true } },
+  { n: 'Full Frame', d: 'Template "canivete suíço" com absolutamente todos os recursos do gerador ativados.', f: { psr: true, admin: true, sub: true, dash: true, notice: true, cpt: true, tax: true, meta: true, block: true, short: true, widget: true, sidebar: true, assets: true, api: true, ajax: true, cron: true, sql: true, roles: true, hooks: true, uninst: true } },
+  { n: 'Newsletter Lite', d: 'Sistema básico de captura de e-mails com armazenamento em meta-dados e Cron para disparos.', f: { meta: true, cron: true, psr: true } },
+  { n: 'Ad Manager', d: 'Gerenciador de anúncios com rastreamento via SQL e exibição via Shortcodes.', f: { sql: true, short: true, psr: true } },
+  { n: 'WooCommerce Sync', d: 'Sincronização de dados via API REST e processos em segundo plano via Cron.', f: { api: true, cron: true, psr: true } },
+  { n: 'Image Optimizer', d: 'Otimização de imagens via ganchos de upload e processamento assíncrono.', f: { assets: true, cron: true, psr: true } },
+  { n: 'Custom Login UI', d: 'Personalização completa da tela de login do WordPress via CSS e Hooks de filtro.', f: { assets: true, admin: true } },
+  { n: 'Review System', d: 'Sistema de avaliações com CPT dedicado, sistema de notas via Meta e Shortcode.', f: { cpt: true, meta: true, short: true } },
+  { n: 'Donation Button', d: 'Botão de doações com configurações administrativas, AJAX e exibição via Shortcode.', f: { admin: true, ajax: true, short: true } },
+  { n: 'Job Board', d: 'Portal de vagas com CPT de Jobs, Taxonomia de localização e áreas de meta-dados.', f: { cpt: true, tax: true, meta: true } },
+  { n: 'Recipe Index', d: 'Índice de receitas com CPT, Taxonomias de culinária e Meta Boxes para ingredientes.', f: { cpt: true, tax: true, meta: true } },
+  { n: 'Affiliate Linker', d: 'Gestor de links de afiliados com tabelas SQL para cliques e redirecionamentos.', f: { sql: true, short: true, hooks: true } },
+  { n: 'User Profile Ext', d: 'Extensão de perfis de usuário com novos campos de meta-dados e área administrativa.', f: { meta: true, admin: true, psr: true } },
+  { n: 'Search Booster', d: 'Melhoria na busca nativa através de filtros de WP_Query e área de ajustes.', f: { admin: true, psr: true } },
+  { n: 'XML Sitemap', d: 'Gerador automático de sitemaps XML via Cron e endpoints personalizados de API.', f: { cron: true, api: true, psr: true } },
+  { n: 'Webhooks Out', d: 'Disparo de webhooks externos em eventos de publicação através de lógica de API.', f: { api: true, hooks: true, psr: true } },
+  { n: 'Slack Notifier', d: 'Notificações no Slack para novos comentários ou pedidos via ganchos de eventos.', f: { hooks: true, api: true, psr: true } },
+  { n: 'Instagram Feed', d: 'Exibição de feed via Shortcode com cache inteligente usando API de Transients.', f: { short: true, admin: true, psr: true } },
+  { n: 'Weather Widget', d: 'Widget de clima com dados em tempo real e cache para evitar excesso de requisições.', f: { widget: true, admin: true, psr: true } },
+  { n: 'Table of Contents', d: 'Geração automática de sumários em posts através de filtros de conteúdo e CSS.', f: { assets: true, psr: true } },
+  { n: 'GDPR Consent', d: 'Aviso de cookies e consentimento de dados via Scripts e painel de ajustes.', f: { assets: true, admin: true, psr: true } },
+  { n: 'Dark Mode Admin', d: 'Implementação de modo escuro para o painel administrativo via CSS injetado.', f: { assets: true, admin: true } },
+  { n: 'Hero Header Pro', d: 'Criação de seções Hero com efeito parallax, CPT dedicado e suporte a shortcode.', f: { cpt: true, assets: true, short: true } },
+  { n: 'Modern Slideshow', d: 'Slideshow responsivo com transições modernas, suporte a toque e gestão via CPT.', f: { cpt: true, assets: true, short: true } },
+  { n: 'Parallax Sections', d: 'Injeção de efeitos de profundidade (parallax) em seções do site via meta-dados.', f: { meta: true, assets: true, psr: true } },
+  { n: 'Video Background', d: 'Adição de backgrounds de vídeo em alta performance para seções de destaque.', f: { meta: true, assets: true, short: true } },
+  { n: 'Sticky Header', d: 'Menu fixo inteligente que reage ao scroll, com customização via painel administrativo.', f: { admin: true, assets: true } },
+  { n: 'Scroll Animation', d: 'Animações de entrada para elementos do site conforme o usuário faz scroll.', f: { assets: true, admin: true, psr: true } },
+  { n: 'Before/After Slider', d: 'Comparador de imagens (antes e depois) ideal para portfólios e cases visuais.', f: { cpt: true, short: true, assets: true } },
+  { n: 'Interactive Map', d: 'Integração de mapas interativos com marcadores personalizados e API dedicada.', f: { admin: true, short: true, assets: true } },
+  { n: 'Floating Action', d: 'Botões flutuantes para ações rápidas (WhatsApp, Chat, Voltar ao topo).', f: { assets: true, admin: true } },
+  { n: 'Mega Menu Base', d: 'Estrutura base para menus complexos com suporte a colunas e widgets internos.', f: { hooks: true, assets: true, psr: true } }
+];
+
+function renderTemps() {
+  const g = document.getElementById('temps-grid');
+  g.innerHTML = '';
+  templates.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'card'; div.style.cursor = 'pointer'; div.style.padding = '12px';
+    div.onclick = () => loadTemplate(i);
+    div.innerHTML = `<div style="font-weight:700;font-size:11px;margin-bottom:4px;color:var(--acc2);" data-i18n="t-n-${i}">${t.n}</div>
+                     <div style="font-size:10.5px;color:var(--mut);line-height:1.4;" data-i18n="t-d-${i}">${t.d}</div>`;
+    g.appendChild(div);
+  });
+  setLang(state.lang);
+}
+
+function loadTemplate(i) {
+  const t = templates[i];
+  state.name = t.n + ' Plugin';
+  state.slug = t.n.toLowerCase().replace(/ /g, '-');
+  document.getElementById('f-name').value = state.name;
+  document.getElementById('f-slug').value = state.slug;
+  Object.keys(state.feats).forEach(k => {
+    state.feats[k] = !!t.f[k];
+    const el = document.getElementById('feat-' + k);
+    if(el) el.classList.toggle('on', state.feats[k]);
+  });
+  sync();
+  showPanel('basic');
+  sbar('Template "' + t.n + '" carregado!');
+}
+
+function sbar(m) {
+  const b = document.getElementById('sbar');
+  document.getElementById('smsg').textContent = m;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 3000);
+}
+
+renderTemps();
+setLang('pt');
+</script>
+</body>
+</html>
