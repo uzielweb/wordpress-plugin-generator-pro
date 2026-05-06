@@ -2,8 +2,8 @@
 
 A high-end, browser-based scaffolding tool designed for professional WordPress developers. Generate production-ready, object-oriented plugin boilerplates in seconds.
 
-## 🚀 Live Demo
-[Access the Generator](https://uzielweb.github.io/wordpress-plugin-generator-pro/)
+## 🚀 Launch Generator
+[Open Generator Tool](https://uzielweb.github.io/wordpress-plugin-generator-pro/)
 
 ## ✨ Key Features
 - **60+ Professional Templates**: From basic starters to complex e-commerce and UI components (Hero, Sliders, Parallax).
