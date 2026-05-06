@@ -1,32 +1,41 @@
 # WordPress Plugin Generator Professional
 
-A modern, browser-based scaffolding tool for professional WordPress plugins.
+A high-end, browser-based scaffolding tool designed for professional WordPress developers. Generate production-ready, object-oriented plugin boilerplates in seconds.
 
-## Features
+## 🚀 Live Demo
+[Access the Generator](https://uzielweb.github.io/wordpress-plugin-generator-pro/)
 
-- **Premium UI**: Dark-mode, high-fidelity interface.
-- **Modern PHP Standards**: Support for PSR-4 namespaces and autoloading.
-- **Feature presets**:
-    - Settings Pages (Admin).
-    - Custom Post Types (CPT).
-    - Shortcodes.
-    - REST API Endpoints.
-- **Multilingual UI**: Support for Portuguese, English, and Spanish.
-- **Standalone**: Works entirely in the browser using JSZip.
+## ✨ Key Features
+- **60+ Professional Templates**: From basic starters to complex e-commerce and UI components (Hero, Sliders, Parallax).
+- **Modern Architecture**:
+    - **PSR-4 Autoloading**: Clean class organization without manual `require`.
+    - **Object-Oriented (OOP)**: Modular classes for Admin, Core, Frontend, and API.
+    - **Settings API**: Automatically generated settings pages and database logic.
+- **Advanced Scaffolding**:
+    - **CPT & Taxonomies**: Quick registration with Meta Box support.
+    - **AJAX & Nonces**: Secure communication handlers ready to use.
+    - **WP-Cron**: Scheduled background tasks setup.
+    - **REST API**: Custom endpoint registration.
+    - **Roles & Capabilities**: Custom user permissions management.
+- **Educational Suite**: Integrated "Learn WP" guide with real-world code snippets and best practices.
+- **Multilingual UI**: Full support for English, Portuguese, and Spanish.
 
-## How to Use
+## 📁 Generated Structure
+```text
+plugin-slug/
+├── assets/             # CSS and JS files
+├── src/                # PSR-4 Namespace (Admin, Core, API, Frontend)
+├── languages/          # .pot and translation files
+├── uninstall.php       # Cleanup logic
+└── plugin-slug.php     # Main entry point
+```
 
-1. Enter your plugin metadata (Name, Slug, Author, etc.).
-2. Toggle the features you want to implement.
-3. Preview the generated code in the "Preview" tab.
-4. Click **Download ZIP** to get your ready-to-use WordPress plugin.
+## 🛠 How to Use
+1. Configure your plugin metadata (Name, Slug, Author).
+2. Choose a pre-configured template or toggle specific features.
+3. Add custom settings fields if needed.
+4. Preview the code in real-time.
+5. Download the ready-to-install `.zip` file.
 
-## Technical Details
-
-- **Namespace**: Automatically generated based on Author and Plugin Name.
-- **Hooks**: Uses standard WordPress actions and filters.
-- **Security**: Includes `defined('ABSPATH') || exit;` in all files.
-
-## License
-
-MIT License.
+---
+Developed by [Antigravity AI](https://github.com/uzielweb)
